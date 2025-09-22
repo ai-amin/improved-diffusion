@@ -5,7 +5,7 @@ Train a diffusion model on images.
 import argparse
 
 from improved_diffusion import dist_util, logger
-from improved_diffusion.image_datasets import load_data
+from improved_diffusion.image_datasets import load_data, load_diffraction_data
 from improved_diffusion.resample import create_named_schedule_sampler
 from improved_diffusion.script_util import (
     model_and_diffusion_defaults,
@@ -30,12 +30,24 @@ def main():
     schedule_sampler = create_named_schedule_sampler(args.schedule_sampler, diffusion)
 
     logger.log("creating data loader...")
-    data = load_data(
-        data_dir=args.data_dir,
-        batch_size=args.batch_size,
-        image_size=args.image_size,
-        class_cond=args.class_cond,
-    )
+    if args.dataset_type == "image":
+        data = load_data(
+            data_dir=args.data_dir,
+            batch_size=args.batch_size,
+            image_size=args.image_size,
+            class_cond=args.class_cond,
+        )
+    elif args.dataset_type == "diffraction":
+        data = load_diffraction_data(
+            data_dir=args.data_dir,
+            batch_size=args.batch_size,
+            image_size=args.image_size,
+            data_type=args.diffraction_data_type,
+            start_id=args.start_id,
+            end_id=args.end_id,
+        )
+    else:
+        raise ValueError(f"Unknown dataset_type: {args.dataset_type}")
 
     logger.log("training...")
     TrainLoop(
@@ -72,6 +84,10 @@ def create_argparser():
         resume_checkpoint="",
         use_fp16=False,
         fp16_scale_growth=1e-3,
+        dataset_type="image",  # image | diffraction
+        diffraction_data_type="cbed",  # cbed | probe | pot
+        start_id=0,
+        end_id=None,
     )
     defaults.update(model_and_diffusion_defaults())
     parser = argparse.ArgumentParser()

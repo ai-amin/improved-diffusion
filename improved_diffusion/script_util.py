@@ -13,12 +13,12 @@ def model_and_diffusion_defaults():
     Defaults for image training.
     """
     return dict(
-        image_size=64,
+        image_size=256,
         num_channels=128,
         num_res_blocks=2,
         num_heads=4,
         num_heads_upsample=-1,
-        attention_resolutions="16,8",
+        attention_resolutions="16,32",
         dropout=0.0,
         learn_sigma=False,
         sigma_small=False,
@@ -97,7 +97,7 @@ def create_model(
     dropout,
 ):
     if image_size == 256:
-        channel_mult = (1, 1, 2, 2, 4, 4)
+        channel_mult = (1, 2, 4, 8) #(1, 1, 2, 2, 4, 4)
     elif image_size == 64:
         channel_mult = (1, 2, 3, 4)
     elif image_size == 32:
